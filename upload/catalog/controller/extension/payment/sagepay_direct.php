@@ -93,10 +93,14 @@ class ControllerExtensionPaymentSagepayDirect extends Controller {
 		}
 
 		$data['existing_cards'] = array();
+
 		if ($this->customer->isLogged() && $data['sagepay_direct_card']) {
 			$this->load->model('extension/payment/sagepay_direct');
+
 			$data['existing_cards'] = $this->model_extension_payment_sagepay_direct->getCards($this->customer->getId());
 		}
+
+		$data['language'] = $this->config->get('config_language');
 
 		return $this->load->view('extension/payment/sagepay_direct', $data);
 	}
@@ -262,7 +266,7 @@ class ControllerExtensionPaymentSagepayDirect extends Controller {
 			$this->model_extension_payment_sagepay_direct->logger('$payment_data', $payment_data);
 			$this->model_extension_payment_sagepay_direct->logger('order_id', $this->session->data['order_id']);
 
-			$json['TermUrl'] = $this->url->link('extension/payment/sagepay_direct/callback', '', true);
+			$json['TermUrl'] = $this->url->link('extension/payment/sagepay_direct/callback', 'language=' . $this->config->get('config_language'));
 		} elseif ($response_data['Status'] == 'OK' || $response_data['Status'] == 'AUTHENTICATED' || $response_data['Status'] == 'REGISTERED') {
 			$message = '';
 
@@ -327,7 +331,7 @@ class ControllerExtensionPaymentSagepayDirect extends Controller {
 				}
 			}
 
-			$json['redirect'] = $this->url->link('checkout/success', '', true);
+			$json['redirect'] = $this->url->link('checkout/success', 'language=' . $this->config->get('config_language'));
 		} else {
 			$json['error'] = $response_data['Status'] . ': ' . $response_data['StatusDetail'];
 			$this->model_extension_payment_sagepay_direct->logger('Response data', $json['error']);
@@ -411,14 +415,14 @@ class ControllerExtensionPaymentSagepayDirect extends Controller {
 					}
 				}
 
-				$this->response->redirect($this->url->link('checkout/success', '', true));
+				$this->response->redirect($this->url->link('checkout/success', 'language=' . $this->config->get('config_language')));
 			} else {
 				$this->session->data['error'] = $response_data['StatusDetail'];
 
-				$this->response->redirect($this->url->link('checkout/checkout', '', true));
+				$this->response->redirect($this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language')));
 			}
 		} else {
-			$this->response->redirect($this->url->link('account/login', '', true));
+			$this->response->redirect($this->url->link('account/login', 'language=' . $this->config->get('config_language')));
 		}
 	}
 

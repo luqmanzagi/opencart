@@ -9,7 +9,9 @@ class ControllerExtensionCaptchaBasic extends Controller {
 			$data['error_captcha'] = '';
 		}
 
-		$data['route'] = $this->request->get['route']; 
+		$data['route'] = (string)$this->request->get['route'];
+
+		$data['language'] = $this->config->get('config_language');
 
 		return $this->load->view('extension/captcha/basic', $data);
 	}

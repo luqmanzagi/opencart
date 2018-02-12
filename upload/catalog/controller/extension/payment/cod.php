@@ -1,7 +1,9 @@
 <?php
 class ControllerExtensionPaymentCod extends Controller {
 	public function index() {
-		return $this->load->view('extension/payment/cod');
+		$data['language'] = $this->config->get('config_language');
+
+		return $this->load->view('extension/payment/cod', $data);
 	}
 
 	public function confirm() {
@@ -12,7 +14,7 @@ class ControllerExtensionPaymentCod extends Controller {
 
 			$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('payment_cod_order_status_id'));
 		
-			$json['redirect'] = $this->url->link('checkout/success');
+			$json['redirect'] = $this->url->link('checkout/success', 'language=' . $this->config->get('config_language'));
 		}
 		
 		$this->response->addHeader('Content-Type: application/json');

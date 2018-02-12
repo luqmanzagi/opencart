@@ -23,6 +23,8 @@ class ControllerExtensionPaymentCardinity extends Controller {
 			);
 		}
 
+		$data['language'] = $this->config->get('config_language');
+
 		return $this->load->view('extension/payment/cardinity', $data);
 	}
 
@@ -75,11 +77,11 @@ class ControllerExtensionPaymentCardinity extends Controller {
 			} catch (Cardinity\Exception\Declined $exception) {
 				$this->failedOrder($this->language->get('error_payment_declined'), $this->language->get('error_payment_declined'));
 
-				$json['redirect'] = $this->url->link('checkout/checkout', '', true);
+				$json['redirect'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'));
 			} catch (Exception $exception) {
 				$this->failedOrder();
 
-				$json['redirect'] = $this->url->link('checkout/checkout', '', true);
+				$json['redirect'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'));
 			}
 
 			$successful_order_statuses = array(
@@ -91,7 +93,7 @@ class ControllerExtensionPaymentCardinity extends Controller {
 				if (!in_array($payment->getStatus(), $successful_order_statuses)) {
 					$this->failedOrder($payment->getStatus());
 
-					$json['redirect'] = $this->url->link('checkout/checkout', '', true);
+					$json['redirect'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'));
 				} else {
 					$this->model_extension_payment_cardinity->addOrder(array(
 						'order_id'   => $this->session->data['order_id'],
@@ -112,13 +114,13 @@ class ControllerExtensionPaymentCardinity extends Controller {
 						$json['3ds'] = array(
 							'url'     => $authorization_information->getUrl(),
 							'PaReq'   => $authorization_information->getData(),
-							'TermUrl' => $this->url->link('extension/payment/cardinity/threeDSecureCallback', '', true),
+							'TermUrl' => $this->url->link('extension/payment/cardinity/threeDSecureCallback', 'language=' . $this->config->get('config_language')),
 							'hash'    => $hash
 						);
 					} elseif ($payment->getStatus() == 'approved') {
 						$this->finalizeOrder($payment);
 
-						$json['redirect'] = $this->url->link('checkout/success', '', true);
+						$json['redirect'] = $this->url->link('checkout/success', 'language=' . $this->config->get('config_language'));
 					}
 				}
 			}
@@ -155,7 +157,7 @@ class ControllerExtensionPaymentCardinity extends Controller {
 		} else {
 			$this->failedOrder($this->language->get('error_invalid_hash'));
 
-			$redirect = $this->url->link('checkout/checkout', '', true);
+			$redirect = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'));
 		}
 
 		$data['success'] = $success;
@@ -201,11 +203,11 @@ class ControllerExtensionPaymentCardinity extends Controller {
 		if ($success) {
 			$this->finalizeOrder($payment);
 
-			$this->response->redirect($this->url->link('checkout/success', '', true));
+			$this->response->redirect($this->url->link('checkout/success', 'language=' . $this->config->get('config_language')));
 		} else {
 			$this->failedOrder($error);
 
-			$this->response->redirect($this->url->link('checkout/checkout', '', true));
+			$this->response->redirect($this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language')));
 		}
 	}
 

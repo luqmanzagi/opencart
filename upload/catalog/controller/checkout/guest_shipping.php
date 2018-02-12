@@ -77,7 +77,9 @@ class ControllerCheckoutGuestShipping extends Controller {
 		} else {
 			$data['address_custom_field'] = array();
 		}
-		
+
+		$data['language'] = $this->config->get('config_language');
+
 		$this->response->setOutput($this->load->view('checkout/guest_shipping', $data));
 	}
 
@@ -88,17 +90,17 @@ class ControllerCheckoutGuestShipping extends Controller {
 
 		// Validate if customer is logged in.
 		if ($this->customer->isLogged()) {
-			$json['redirect'] = $this->url->link('checkout/checkout', '', true);
+			$json['redirect'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'));
 		}
 
 		// Validate cart has products and has stock.
 		if ((!$this->cart->hasProducts() && empty($this->session->data['vouchers'])) || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))) {
-			$json['redirect'] = $this->url->link('checkout/cart');
+			$json['redirect'] = $this->url->link('checkout/cart', 'language=' . $this->config->get('config_language'));
 		}
 
 		// Check if guest checkout is available.
 		if (!$this->config->get('config_checkout_guest') || $this->config->get('config_customer_price') || $this->cart->hasDownload()) {
-			$json['redirect'] = $this->url->link('checkout/checkout', '', true);
+			$json['redirect'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'));
 		}
 
 		if (!$json) {

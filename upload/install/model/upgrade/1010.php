@@ -201,7 +201,25 @@ class ModelUpgrade1010 extends Model {
 			'trigger' => 'admin/model/user/user/editCode/after', 
 			'action'  => 'mail/forgotten'
 		);
-		
+
+		$events[] = array(
+			'code'    => 'admin_currency_add',
+			'trigger' => 'admin/model/currency/addCurrency/after',
+			'action'  => 'event/currency'
+		);
+
+		$events[] = array(
+			'code'    => 'admin_currency_edit',
+			'trigger' => 'admin/model/currency/editCurrency/after',
+			'action'  => 'event/currency'
+		);
+
+		$events[] = array(
+			'code'    => 'admin_setting',
+			'trigger' => 'admin/model/setting/setting/editSetting/after',
+			'action'  => 'event/currency'
+		);
+
 		foreach ($events as $event) {
 			$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "event` WHERE `code` = '" . $this->db->escape($event['code']) . "'");
 			
@@ -209,5 +227,34 @@ class ModelUpgrade1010 extends Model {
 				$this->db->query("INSERT INTO `" . DB_PREFIX . "event` SET `code` = '" . $this->db->escape($event['code']) . "', `trigger` = '" . $this->db->escape($event['trigger']) . "', `action` = '" . $this->db->escape($event['action']) . "', `status` = '1', `sort_order` = '0'");
 			}
 		}
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "event` SET `trigger` = 'admin/model/sale/return/addReturnHistory/after' WHERE `code` = 'admin_mail_return'");
+
+		// extension_install
+		$query = $this->db->query("SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" . DB_DATABASE . "' AND TABLE_NAME = '" . DB_PREFIX . "extension_install' AND COLUMN_NAME = 'extension_id'");
+
+		if (!$query->num_rows) {
+			$this->db->query("ALTER TABLE `" . DB_PREFIX . "extension_install` ADD `extension_id` int NOT NULL AFTER `extension_install_id`");
+		}
+
+		// If backup storage directory does not exist
+		if (!is_dir(DIR_STORAGE . 'backup')) {
+			mkdir(DIR_STORAGE . 'backup', '0644');
+
+			$handle = fopen(DIR_STORAGE . 'backup/index.html', 'w');
+
+			fclose($handle);
+		}
+
+		// If backup storage directory does not exist
+		if (!is_dir(DIR_STORAGE . 'marketplace')) {
+			mkdir(DIR_STORAGE . 'marketplace', '0644');
+
+			$handle = fopen(DIR_STORAGE . 'marketplace/index.html', 'w');
+
+			fclose($handle);
+		}
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "setting` SET `key` = 'payment_free_checkout_order_status_id' WHERE `key` = 'free_checkout_order_status_id'");
 	}
 }

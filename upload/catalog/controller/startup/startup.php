@@ -2,11 +2,7 @@
 class ControllerStartupStartup extends Controller {
 	public function index() {
 		// Store
-		if ($this->request->server['HTTPS']) {
-			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "store WHERE REPLACE(`ssl`, 'www.', '') = '" . $this->db->escape('https://' . str_replace('www.', '', $_SERVER['HTTP_HOST']) . rtrim(dirname($_SERVER['PHP_SELF']), '/.\\') . '/') . "'");
-		} else {
-			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "store WHERE REPLACE(`url`, 'www.', '') = '" . $this->db->escape('http://' . str_replace('www.', '', $_SERVER['HTTP_HOST']) . rtrim(dirname($_SERVER['PHP_SELF']), '/.\\') . '/') . "'");
-		}
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "store` WHERE REPLACE(`url`, 'www.', '') = '" . $this->db->escape(($this->request->server['HTTPS'] ? 'https://' : 'http://') . str_replace('www.', '', $_SERVER['HTTP_HOST']) . rtrim(dirname($_SERVER['PHP_SELF']), '/.\\') . '/') . "'");
 
 		if (isset($this->request->get['store_id'])) {
 			$this->config->set('config_store_id', (int)$this->request->get['store_id']);
@@ -18,7 +14,6 @@ class ControllerStartupStartup extends Controller {
 
 		if (!$query->num_rows) {
 			$this->config->set('config_url', HTTP_SERVER);
-			$this->config->set('config_ssl', HTTPS_SERVER);
 		}
 
 		// Settings
@@ -32,11 +27,25 @@ class ControllerStartupStartup extends Controller {
 			}
 		}
 
+		// Set time zone
+		if ($this->config->get('config_timezone')) {
+			date_default_timezone_set($this->config->get('config_timezone'));
+		}
+
 		// Theme
 		$this->config->set('template_cache', $this->config->get('developer_theme'));
 
 		// Url
-		$this->registry->set('url', new Url($this->config->get('config_url'), $this->config->get('config_ssl')));
+		$this->registry->set('url', new Url($this->config->get('config_url')));
+
+
+
+
+
+
+
+
+
 
 		// Language
 		$code = '';
@@ -47,20 +56,38 @@ class ControllerStartupStartup extends Controller {
 
 		$language_codes = array_column($languages, 'language_id', 'code');
 
-		if (isset($this->session->data['language'])) {
-			if (array_key_exists($this->session->data['language'], $language_codes)) {
-				$code = $this->session->data['language'];
-		 	}
+		if (!isset($this->request->cookie['language'])) {
+
+
+
+
 		}
 
-		if (empty($code) && isset($this->request->cookie['language'])) {
+
+
+
+
+
+		if (isset($this->request->get['language']) && in_array($this->request->get['language'], array_keys($language_codes))) {
+			$code = $this->request->get['language'];
+		}
+
+
+
+
+
+		//$this->config->get('config_language')
+
+		//$code = $this->request->get['language'];
+
+		if (!$code && isset($this->request->cookie['language'])) {
 			if (array_key_exists($this->request->cookie['language'], $language_codes)) {
-				$code = $this->request->cookie['language'];
+		//		$code = $this->request->cookie['language'];
 			}
 		}
 
 		// Language Detection
-		if (empty($code) && !empty($this->request->server['HTTP_ACCEPT_LANGUAGE'])) {
+		if (!$code && !empty($this->request->server['HTTP_ACCEPT_LANGUAGE'])) {
 			$detect = '';
 
 			$browser_codes = array();
@@ -105,6 +132,10 @@ class ControllerStartupStartup extends Controller {
 			$code = ($detect) ? $detect : '';
 		}
 
+
+
+
+
 		if (!array_key_exists($code, $language_codes)) {
 			$code = $this->config->get('config_language');
 		}
@@ -117,14 +148,25 @@ class ControllerStartupStartup extends Controller {
 			setcookie('language', $code, time() + 60 * 60 * 24 * 30, '/', $this->request->server['HTTP_HOST']);
 		}
 
+
+
 		// Overwrite the default language object
 		$language = new Language($code);
 		$language->load($code);
-
 		$this->registry->set('language', $language);
 
 		// Set the config language_id
 		$this->config->set('config_language_id', $language_codes[$code]);
+		$this->config->set('config_language', $code);
+
+
+
+
+
+
+
+
+
 
 		// Customer
 		$customer = new Cart\Customer($this->registry);
@@ -139,13 +181,6 @@ class ControllerStartupStartup extends Controller {
 			$this->config->set('config_customer_group_id', $this->customer->getGroupId());
 		} elseif (isset($this->session->data['guest']) && isset($this->session->data['guest']['customer_group_id'])) {
 			$this->config->set('config_customer_group_id', $this->session->data['guest']['customer_group_id']);
-		}
-
-		// Tracking Code
-		if (isset($this->request->get['tracking'])) {
-			setcookie('tracking', $this->request->get['tracking'], time() + 3600 * 24 * 1000, '/');
-
-			$this->db->query("UPDATE `" . DB_PREFIX . "marketing` SET clicks = (clicks + 1) WHERE code = '" . $this->db->escape($this->request->get['tracking']) . "'");
 		}
 
 		// Currency

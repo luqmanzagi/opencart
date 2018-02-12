@@ -71,16 +71,20 @@
             <div class="form-group">
               <label class="control-label" for="input-date-added">{{ entry_date_added }}</label>
               <div class="input-group date">
-                <input type="text" name="filter_date_added" value="{{ filter_date_added }}" placeholder="{{ entry_date_added }}" data-date-format="YYYY-MM-DD" id="input-date-added" class="form-control"/> <span class="input-group-btn">
-              <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
-              </span></div>
+                <input type="text" name="filter_date_added" value="{{ filter_date_added }}" placeholder="{{ entry_date_added }}" data-date-format="YYYY-MM-DD" id="input-date-added" class="form-control"/>
+                <div class="input-group-btn">
+                  <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+                </div>
+              </div>
             </div>
             <div class="form-group">
               <label class="control-label" for="input-date-modified">{{ entry_date_modified }}</label>
               <div class="input-group date">
-                <input type="text" name="filter_date_modified" value="{{ filter_date_modified }}" placeholder="{{ entry_date_modified }}" data-date-format="YYYY-MM-DD" id="input-date-modified" class="form-control"/> <span class="input-group-btn">
-              <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
-              </span></div>
+                <input type="text" name="filter_date_modified" value="{{ filter_date_modified }}" placeholder="{{ entry_date_modified }}" data-date-format="YYYY-MM-DD" id="input-date-modified" class="form-control"/>
+                <div class="input-group-btn">
+                  <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+                </div>
+              </div>
             </div>
             <div class="form-group text-right">
               <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
@@ -99,7 +103,7 @@
                 <table class="table table-bordered table-hover">
                   <thead>
                   <tr>
-                    <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);"/></td>
+                    <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').trigger('click');"/></td>
                     <td class="text-right">{% if sort == 'o.order_id' %} <a href="{{ sort_order }}" class="{{ order|lower }}">{{ column_order_id }}</a> {% else %} <a href="{{ sort_order }}">{{ column_order_id }}</a> {% endif %}</td>
                     <td class="text-left">{% if sort == 'customer' %} <a href="{{ sort_customer }}" class="{{ order|lower }}">{{ column_customer }}</a> {% else %} <a href="{{ sort_customer }}">{{ column_customer }}</a> {% endif %}</td>
                     <td class="text-left">{% if sort == 'order_status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
@@ -288,7 +292,7 @@ $('#form-order li:last-child a').on('click', function(e) {
 <link href="view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" media="screen"/>
 <script type="text/javascript"><!--
 $('.date').datetimepicker({
-	language: '{{ datepicker }}',
+	locale: '{{ datepicker }}',
 	pickTime: false
 });
 //--></script>

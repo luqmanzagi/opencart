@@ -18,14 +18,14 @@ class ControllerMarketplaceInstall extends Controller {
 		// Make sure the file name is stored in the session.
 		if (!isset($this->session->data['install'])) {
 			$json['error'] = $this->language->get('error_file');
-		} elseif (!is_file(DIR_UPLOAD . $this->session->data['install'] . '.tmp')) {
+		} elseif (!is_file(DIR_STORAGE . 'marketplace/' . $this->session->data['install'] . '.tmp')) {
 			$json['error'] = $this->language->get('error_file');
 		}
 
 		if (!$json) {
 			$json['text'] = $this->language->get('text_unzip');
 
-			$json['next'] = str_replace('&amp;', '&', $this->url->link('marketplace/install/unzip', 'user_token=' . $this->session->data['user_token'] . '&extension_install_id=' . $extension_install_id, true));
+			$json['next'] = str_replace('&amp;', '&', $this->url->link('marketplace/install/unzip', 'user_token=' . $this->session->data['user_token'] . '&extension_install_id=' . $extension_install_id));
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -49,19 +49,19 @@ class ControllerMarketplaceInstall extends Controller {
 
 		if (!isset($this->session->data['install'])) {
 			$json['error'] = $this->language->get('error_file');
-		} elseif (!is_file(DIR_UPLOAD . $this->session->data['install'] . '.tmp')) {
+		} elseif (!is_file(DIR_STORAGE . 'marketplace/' . $this->session->data['install'] . '.tmp')) {
 			$json['error'] = $this->language->get('error_file');
 		}
 		
 		// Sanitize the filename
 		if (!$json) {
-			$file = DIR_UPLOAD . $this->session->data['install'] . '.tmp';
+			$file = DIR_STORAGE . 'marketplace/' . $this->session->data['install'] . '.tmp';
 					
 			// Unzip the files
 			$zip = new ZipArchive();
 
 			if ($zip->open($file)) {
-				$zip->extractTo(DIR_UPLOAD . 'tmp-' . $this->session->data['install']);
+				$zip->extractTo(DIR_STORAGE . 'marketplace/' . 'tmp-' . $this->session->data['install']);
 				$zip->close();
 			} else {
 				$json['error'] = $this->language->get('error_unzip');
@@ -72,7 +72,7 @@ class ControllerMarketplaceInstall extends Controller {
 
 			$json['text'] = $this->language->get('text_move');
 
-			$json['next'] = str_replace('&amp;', '&', $this->url->link('marketplace/install/move', 'user_token=' . $this->session->data['user_token'] . '&extension_install_id=' . $extension_install_id, true));
+			$json['next'] = str_replace('&amp;', '&', $this->url->link('marketplace/install/move', 'user_token=' . $this->session->data['user_token'] . '&extension_install_id=' . $extension_install_id));
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -96,12 +96,12 @@ class ControllerMarketplaceInstall extends Controller {
 
 		if (!isset($this->session->data['install'])) {
 			$json['error'] = $this->language->get('error_directory');
-		} elseif (!is_dir(DIR_UPLOAD . 'tmp-' . $this->session->data['install'] . '/')) {
+		} elseif (!is_dir(DIR_STORAGE . 'marketplace/' . 'tmp-' . $this->session->data['install'] . '/')) {
 			$json['error'] = $this->language->get('error_directory');
 		}
 
 		if (!$json) {
-			$directory = DIR_UPLOAD . 'tmp-' . $this->session->data['install'] . '/';
+			$directory = DIR_STORAGE . 'marketplace/tmp-' . $this->session->data['install'] . '/';
 		
 			if (is_dir($directory . 'upload/')) {
 				$files = array();
@@ -137,7 +137,8 @@ class ControllerMarketplaceInstall extends Controller {
 					'catalog/view/theme/',
 					'system/config/',
 					'system/library/',
-					'image/catalog/'
+					'image/catalog/',
+					'image/payment/'
 				);
 	
 				// First we need to do some checks
@@ -227,7 +228,7 @@ class ControllerMarketplaceInstall extends Controller {
 		if (!$json) {
 			$json['text'] = $this->language->get('text_xml');
 
-			$json['next'] = str_replace('&amp;', '&', $this->url->link('marketplace/install/xml', 'user_token=' . $this->session->data['user_token'] . '&extension_install_id=' . $extension_install_id, true));
+			$json['next'] = str_replace('&amp;', '&', $this->url->link('marketplace/install/xml', 'user_token=' . $this->session->data['user_token'] . '&extension_install_id=' . $extension_install_id));
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -251,12 +252,12 @@ class ControllerMarketplaceInstall extends Controller {
 
 		if (!isset($this->session->data['install'])) {
 			$json['error'] = $this->language->get('error_directory');
-		} elseif (!is_dir(DIR_UPLOAD . 'tmp-' . $this->session->data['install'] . '/')) {
+		} elseif (!is_dir(DIR_STORAGE . 'marketplace/' . 'tmp-' . $this->session->data['install'] . '/')) {
 			$json['error'] = $this->language->get('error_directory');
 		}
 
 		if (!$json) {
-			$file = DIR_UPLOAD . 'tmp-' . $this->session->data['install'] . '/install.xml';
+			$file = DIR_STORAGE . 'marketplace/' . 'tmp-' . $this->session->data['install'] . '/install.xml';
 
 			if (is_file($file)) {
 				$this->load->model('setting/modification');
@@ -340,7 +341,7 @@ class ControllerMarketplaceInstall extends Controller {
 		if (!$json) {
 			$json['text'] = $this->language->get('text_clear');
 
-			$json['next'] = str_replace('&amp;', '&', $this->url->link('marketplace/install/clear', 'user_token=' . $this->session->data['user_token'], true));
+			$json['next'] = str_replace('&amp;', '&', $this->url->link('marketplace/install/clear', 'user_token=' . $this->session->data['user_token']));
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -361,7 +362,7 @@ class ControllerMarketplaceInstall extends Controller {
 		}
 
 		if (!$json) {
-			$directory = DIR_UPLOAD . 'tmp-' . $this->session->data['install'] . '/';
+			$directory = DIR_STORAGE . 'marketplace/tmp-' . $this->session->data['install'] . '/';
 			
 			if (is_dir($directory)) {
 				// Get a list of files ready to upload
@@ -399,7 +400,7 @@ class ControllerMarketplaceInstall extends Controller {
 				}
 			}
 			
-			$file = DIR_UPLOAD . $this->session->data['install'] . '.tmp';
+			$file = DIR_STORAGE . 'marketplace/' . $this->session->data['install'] . '.tmp';
 			
 			if (is_file($file)) {
 				unlink($file);

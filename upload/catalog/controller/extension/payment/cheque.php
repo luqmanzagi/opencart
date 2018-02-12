@@ -6,6 +6,8 @@ class ControllerExtensionPaymentCheque extends Controller {
 		$data['payable'] = $this->config->get('payment_cheque_payable');
 		$data['address'] = nl2br($this->config->get('config_address'));
 
+		$data['language'] = $this->config->get('config_language');
+
 		return $this->load->view('extension/payment/cheque', $data);
 	}
 
@@ -25,7 +27,7 @@ class ControllerExtensionPaymentCheque extends Controller {
 			
 			$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('payment_cheque_order_status_id'), $comment, true);
 			
-			$json['redirect'] = $this->url->link('checkout/success');
+			$json['redirect'] = $this->url->link('checkout/success', 'language=' . $this->config->get('config_language'));
 		}
 		
 		$this->response->addHeader('Content-Type: application/json');

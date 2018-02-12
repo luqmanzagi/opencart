@@ -12,70 +12,6 @@ class ControllerMarketplaceCron extends Controller {
 		$this->getList();
 	}
 
-	public function enable() {
-		$this->load->language('marketplace/cron');
-
-		$this->document->setTitle($this->language->get('heading_title'));
-
-		$this->load->model('setting/cron');
-
-		if (isset($this->request->get['cron_id']) && $this->validate()) {
-			$this->model_setting_cron->enableCron($this->request->get['cron_id']);
-
-			$this->session->data['success'] = $this->language->get('text_success');
-
-			$url = '';
-
-			if (isset($this->request->get['sort'])) {
-				$url .= '&sort=' . $this->request->get['sort'];
-			}
-
-			if (isset($this->request->get['order'])) {
-				$url .= '&order=' . $this->request->get['order'];
-			}
-
-			if (isset($this->request->get['page'])) {
-				$url .= '&page=' . $this->request->get['page'];
-			}
-
-			$this->response->redirect($this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . $url, true));
-		}
-
-		$this->getList();
-	}
-
-	public function disable() {
-		$this->load->language('marketplace/cron');
-
-		$this->document->setTitle($this->language->get('heading_title'));
-
-		$this->load->model('setting/cron');
-
-		if (isset($this->request->get['cron_id']) && $this->validate()) {
-			$this->model_setting_cron->disableCron($this->request->get['cron_id']);
-
-			$this->session->data['success'] = $this->language->get('text_success');
-
-			$url = '';
-
-			if (isset($this->request->get['sort'])) {
-				$url .= '&sort=' . $this->request->get['sort'];
-			}
-
-			if (isset($this->request->get['order'])) {
-				$url .= '&order=' . $this->request->get['order'];
-			}
-
-			if (isset($this->request->get['page'])) {
-				$url .= '&page=' . $this->request->get['page'];
-			}
-
-			$this->response->redirect($this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . $url, true));
-		}
-
-		$this->getList();
-	}
-	
 	public function delete() {
 		$this->load->language('marketplace/cron');
 
@@ -104,12 +40,12 @@ class ControllerMarketplaceCron extends Controller {
 				$url .= '&page=' . $this->request->get['page'];
 			}
 
-			$this->response->redirect($this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . $url, true));
+			$this->response->redirect($this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . $url));
 		}
 
 		$this->getList();
-	}	
-	
+	}
+
 	public function getList() {
 		if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
@@ -147,15 +83,16 @@ class ControllerMarketplaceCron extends Controller {
 
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
+			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'])
 		);
 
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . $url, true)
+			'href' => $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . $url)
 		);
 
-		$data['delete'] = $this->url->link('marketplace/cron/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['delete'] = $this->url->link('marketplace/cron/delete', 'user_token=' . $this->session->data['user_token'] . $url);
+		$data['cron'] = $this->url->link('common/cron');
 
 		$data['crons'] = array();
 
@@ -166,7 +103,7 @@ class ControllerMarketplaceCron extends Controller {
 			'limit' => $this->config->get('config_limit_admin')
 		);
 
-		$event_total = $this->model_setting_cron->getTotalCrons();
+		$cron_total = $this->model_setting_cron->getTotalCrons();
 
 		$results = $this->model_setting_cron->getCrons($filter_data);
 
@@ -174,16 +111,16 @@ class ControllerMarketplaceCron extends Controller {
 			$data['crons'][] = array(
 				'cron_id'       => $result['cron_id'],
 				'code'          => $result['code'],
-				'period'        => $result['period'],
+				'cycle'         => $this->language->get('text_' . $result['cycle']),
 				'action'        => $result['action'],
 				'status'        => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
-				'date_added'    => $result['date_added'],
-				'date_modified' => $result['date_modified'],
-				'enable'        => $this->url->link('marketplace/cron/enable', 'user_token=' . $this->session->data['user_token'] . '&cron_id=' . $result['cron_id'] . $url, true),
-				'disable'       => $this->url->link('marketplace/cron/disable', 'user_token=' . $this->session->data['user_token'] . '&cron_id=' . $result['cron_id'] . $url, true),
+				'date_added'    => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
+				'date_modified' => date($this->language->get('datetime_format'), strtotime($result['date_modified'])),
 				'enabled'       => $result['status']
 			);
 		}
+
+		$data['user_token'] = $this->session->data['user_token'];
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -217,10 +154,12 @@ class ControllerMarketplaceCron extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['sort_code'] = $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . '&sort=code' . $url, true);
-		$data['sort_period'] = $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . '&sort=period' . $url, true);
-		$data['sort_sort_order'] = $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . '&sort=sort_order' . $url, true);
-		$data['sort_status'] = $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . '&sort=status' . $url, true);
+		$data['sort_code'] = $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . '&sort=code' . $url);
+		$data['sort_cycle'] = $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . '&sort=cycle' . $url);
+		$data['sort_action'] = $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . '&sort=action' . $url);
+		$data['sort_status'] = $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . '&sort=status' . $url);
+		$data['sort_date_added'] = $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . '&sort=date_added' . $url);
+		$data['sort_date_modified'] = $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . '&sort=date_modified' . $url);
 
 		$url = '';
 
@@ -233,14 +172,14 @@ class ControllerMarketplaceCron extends Controller {
 		}
 
 		$pagination = new Pagination();
-		$pagination->total = $event_total;
+		$pagination->total = $cron_total;
 		$pagination->page = $page;
 		$pagination->limit = $this->config->get('config_limit_admin');
-		$pagination->url = $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
+		$pagination->url = $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}');
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($event_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($event_total - $this->config->get('config_limit_admin'))) ? $event_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $event_total, ceil($event_total / $this->config->get('config_limit_admin')));
+		$data['results'] = sprintf($this->language->get('text_pagination'), ($cron_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($cron_total - $this->config->get('config_limit_admin'))) ? $cron_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $cron_total, ceil($cron_total / $this->config->get('config_limit_admin')));
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
@@ -258,5 +197,86 @@ class ControllerMarketplaceCron extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	public function run() {
+		$this->load->language('marketplace/cron');
+
+		$json = array();
+
+		if (isset($this->request->get['cron_id'])) {
+			$cron_id = $this->request->get['cron_id'];
+		} else {
+			$cron_id = 0;
+		}
+
+		if (!$this->user->hasPermission('modify', 'marketplace/cron')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$this->load->model('setting/cron');
+
+			$cron_info = $this->model_setting_cron->getCron($cron_id);
+
+			if ($cron_info) {
+				$this->load->controller($cron_info['action'], $cron_id, $cron_info['code'], $cron_info['cycle'], $cron_info['date_added'], $cron_info['date_modified']);
+
+				$this->model_setting_cron->editCron($cron_info['cron_id']);
+			}
+
+			$json['success'] = $this->language->get('text_success');
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function enable() {
+		$this->load->language('marketplace/cron');
+
+		$json = array();
+
+		if (isset($this->request->get['cron_id'])) {
+			$cron_id = $this->request->get['cron_id'];
+		} else {
+			$cron_id = 0;
+		}
+
+		if (!$this->user->hasPermission('modify', 'marketplace/cron')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$this->load->model('setting/cron');
+
+			$this->model_setting_cron->editStatus($cron_id, 1);
+
+			$json['success'] = $this->language->get('text_success');
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function disable() {
+		$this->load->language('marketplace/cron');
+
+		$json = array();
+
+		if (isset($this->request->get['cron_id'])) {
+			$cron_id = $this->request->get['cron_id'];
+		} else {
+			$cron_id = 0;
+		}
+
+		if (!$this->user->hasPermission('modify', 'marketplace/cron')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$this->load->model('setting/cron');
+
+			$this->model_setting_cron->editStatus($cron_id, 0);
+
+			$json['success'] = $this->language->get('text_success');
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 }

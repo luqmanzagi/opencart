@@ -193,19 +193,13 @@
                 <label class="col-sm-2 control-label" for="input-country">{{ entry_country }}</label>
                 <div class="col-sm-10">
                   <select name="config_country_id" id="input-country" class="form-control">
-
                     {% for country in countries %}
                       {% if country.country_id == config_country_id %}
-
                         <option value="{{ country.country_id }}" selected="selected">{{ country.name }}</option>
-
                       {% else %}
-
                         <option value="{{ country.country_id }}">{{ country.name }}</option>
-
                       {% endif %}
                     {% endfor %}
-
                   </select>
                 </div>
               </div>
@@ -213,6 +207,20 @@
                 <label class="col-sm-2 control-label" for="input-zone">{{ entry_zone }}</label>
                 <div class="col-sm-10">
                   <select name="config_zone_id" id="input-zone" class="form-control"> </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-timezone">{{ entry_timezone }}</label>
+                <div class="col-sm-10">
+                  <select name="config_timezone" id="input-timezone" class="form-control">
+                  {% for timezone in timezones %}
+                    {% if timezone.value == config_timezone %}
+                    <option value="{{ timezone.value }}" selected="selected">{{ timezone.text }}</option>
+                    {% else %}
+                    <option value="{{ timezone.value }}">{{ timezone.text }}</option>
+                    {% endif %}
+                  {% endfor %}
+                  </select>
                 </div>
               </div>
               <div class="form-group">
@@ -276,15 +284,36 @@
                 </div>
               </div>
               <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-currency-engine">{{ entry_currency_engine }}</label>
+                <div class="col-sm-10">
+                  <select name="config_currency_engine" id="input-currency-engine" class="form-control">
+
+                    {% for currency_engine in currency_engines %}
+                      {% if currency_engine.value == config_currency_engine %}
+
+                        <option value="{{ currency_engine.value }}" selected="selected">{{ currency_engine.text }}</option>
+
+                      {% else %}
+
+                        <option value="{{ currency_engine.value }}">{{ currency_engine.text }}</option>
+
+                      {% endif %}
+                    {% endfor %}
+
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
                 <label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_currency_auto }}">{{ entry_currency_auto }}</span></label>
                 <div class="col-sm-10">
-                  <label class="radio-inline"> {% if config_currency_auto %}
+                  <label class="radio-inline">{% if config_currency_auto %}
                       <input type="radio" name="config_currency_auto" value="1" checked="checked"/>
                       {{ text_yes }}
                     {% else %}
                       <input type="radio" name="config_currency_auto" value="1"/>
                       {{ text_yes }}
-                    {% endif %} </label> <label class="radio-inline"> {% if not config_currency_auto %}
+                    {% endif %}</label> <label class="radio-inline"> {% if not config_currency_auto %}
                       <input type="radio" name="config_currency_auto" value="0" checked="checked"/>
                       {{ text_no }}
                     {% else %}
@@ -1191,24 +1220,6 @@
               <fieldset>
                 <legend>{{ text_security }}</legend>
                 <div class="form-group">
-                  <label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_secure }}">{{ entry_secure }}</span></label>
-                  <div class="col-sm-10">
-                    <label class="radio-inline"> {% if config_secure %}
-                        <input type="radio" name="config_secure" value="1" checked="checked"/>
-                        {{ text_yes }}
-                      {% else %}
-                        <input type="radio" name="config_secure" value="1"/>
-                        {{ text_yes }}
-                      {% endif %} </label> <label class="radio-inline"> {% if not config_secure %}
-                        <input type="radio" name="config_secure" value="0" checked="checked"/>
-                        {{ text_no }}
-                      {% else %}
-                        <input type="radio" name="config_secure" value="0"/>
-                        {{ text_no }}
-                      {% endif %} </label>
-                  </div>
-                </div>
-                <div class="form-group">
                   <label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_password }}">{{ entry_password }}</span></label>
                   <div class="col-sm-10">
                     <label class="radio-inline"> {% if config_password %}
@@ -1250,7 +1261,7 @@
                     <textarea name="config_encryption" rows="5" placeholder="{{ entry_encryption }}" id="input-encryption" class="form-control">{{ config_encryption }}</textarea>
                     {% if error_encryption %}
                       <div class="text-danger">{{ error_encryption }}</div>
-                    {% endif %} </div>
+                    {% endif %}</div>
                 </div>
               </fieldset>
               <fieldset>
@@ -1265,12 +1276,18 @@
                   <label class="col-sm-2 control-label" for="input-file-ext-allowed"><span data-toggle="tooltip" title="{{ help_file_ext_allowed }}">{{ entry_file_ext_allowed }}</span></label>
                   <div class="col-sm-10">
                     <textarea name="config_file_ext_allowed" rows="5" placeholder="{{ entry_file_ext_allowed }}" id="input-file-ext-allowed" class="form-control">{{ config_file_ext_allowed }}</textarea>
+                    {% if error_extension %}
+                      <div class="text-danger">{{ error_extension }}</div>
+                    {% endif %}
                   </div>
                 </div>
                 <div class="form-group">
                   <label class="col-sm-2 control-label" for="input-file-mime-allowed"><span data-toggle="tooltip" title="{{ help_file_mime_allowed }}">{{ entry_file_mime_allowed }}</span></label>
                   <div class="col-sm-10">
                     <textarea name="config_file_mime_allowed" rows="5" placeholder="{{ entry_file_mime_allowed }}" id="input-file-mime-allowed" class="form-control">{{ config_file_mime_allowed }}</textarea>
+                    {% if error_mime %}
+                      <div class="text-danger">{{ error_mime }}</div>
+                    {% endif %}
                   </div>
                 </div>
               </fieldset>
@@ -1279,7 +1296,7 @@
                 <div class="form-group">
                   <label class="col-sm-2 control-label">{{ entry_error_display }}</label>
                   <div class="col-sm-10">
-                    <label class="radio-inline"> {% if config_error_display %}
+                    <label class="radio-inline">{% if config_error_display %}
                         <input type="radio" name="config_error_display" value="1" checked="checked"/>
                         {{ text_yes }}
                       {% else %}
@@ -1297,7 +1314,7 @@
                 <div class="form-group">
                   <label class="col-sm-2 control-label">{{ entry_error_log }}</label>
                   <div class="col-sm-10">
-                    <label class="radio-inline"> {% if config_error_log %}
+                    <label class="radio-inline">{% if config_error_log %}
                         <input type="radio" name="config_error_log" value="1" checked="checked"/>
                         {{ text_yes }}
                       {% else %}
@@ -1390,4 +1407,4 @@ $('select[name=\'config_country_id\']').on('change', function() {
 
 $('select[name=\'config_country_id\']').trigger('change');
 //--></script>
-{{ footer }} 
+{{ footer }}

@@ -23,6 +23,8 @@ class ControllerExtensionPaymentWebPaymentSoftware extends Controller {
 			);
 		}
 
+		$data['language'] = $this->config->get('config_language');
+
 		return $this->load->view('extension/payment/web_payment_software', $data);
 	}
 
@@ -123,7 +125,7 @@ class ControllerExtensionPaymentWebPaymentSoftware extends Controller {
 
 			$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('payment_web_payment_software_order_status_id'), $message, false);
 
-			$json['redirect'] = $this->url->link('checkout/success', '', true);
+			$json['redirect'] = $this->url->link('checkout/success', 'language=' . $this->config->get('config_language'));
 		} else {
 			$json['error'] = (string)$xml->response_text;
 		}
