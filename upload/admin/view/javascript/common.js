@@ -29,13 +29,15 @@ $(document).ready(function() {
 	});
 
 	// Highlight any found errors
-	$('.text-danger').each(function() {
-		var element = $(this).parent().parent();
+	$('.invalid-tooltip').each(function() {
+		var element = $(this).parent().find(':input');
 
-		if (element.hasClass('form-group')) {
-			element.addClass('has-error');
+		if (element.hasClass('form-control')) {
+			element.addClass('is-invalid');
 		}
 	});
+
+	$('.invalid-tooltip').show();
 
 	// tooltips on hover
 	$('[data-toggle=\'tooltip\']').tooltip({container: 'body', html: true});
@@ -43,6 +45,16 @@ $(document).ready(function() {
 	// Makes tooltips work on ajax generated content
 	$(document).ajaxStop(function() {
 		$('[data-toggle=\'tooltip\']').tooltip({container: 'body'});
+	});
+
+	// tooltip remove
+	$('[data-toggle=\'tooltip\']').on('remove', function() {
+		$(this).tooltip('dispose');
+	});
+
+	// Tooltip remove fixed
+	$(document).on('click', '[data-toggle=\'tooltip\']', function(e) {
+		$('body > .tooltip').remove();
 	});
 
 	// https://github.com/opencart/opencart/issues/2595
@@ -53,20 +65,10 @@ $(document).ready(function() {
 			}
 		}
 	}
-	
-	// tooltip remove
-	$('[data-toggle=\'tooltip\']').on('remove', function() {
-		$(this).tooltip('destroy');
-	});
 
-	// Tooltip remove fixed
-	$(document).on('click', '[data-toggle=\'tooltip\']', function(e) {
-		$('body > .tooltip').remove();
-	});
-	
 	$('#button-menu').on('click', function(e) {
 		e.preventDefault();
-		
+
 		$('#column-left').toggleClass('active');
 	});
 
@@ -81,79 +83,42 @@ $(document).ready(function() {
 		// Sets active and open to selected page in the left column menu.
 		$('#menu a[href=\'' + sessionStorage.getItem('menu') + '\']').parent().addClass('active');
 	}
-	
+
 	$('#menu a[href=\'' + sessionStorage.getItem('menu') + '\']').parents('li > a').removeClass('collapsed');
-	
-	$('#menu a[href=\'' + sessionStorage.getItem('menu') + '\']').parents('ul').addClass('in');
-	
+
+	$('#menu a[href=\'' + sessionStorage.getItem('menu') + '\']').parents('ul').addClass('show');
+
 	$('#menu a[href=\'' + sessionStorage.getItem('menu') + '\']').parents('li').addClass('active');
-	
+
 	// Image Manager
-	$(document).on('click', 'a[data-toggle=\'image\']', function(e) {
-		var $element = $(this);
-		var $popover = $element.data('bs.popover'); // element has bs popover?
+	$(document).on('click', '[data-toggle=\'image\']', function(e) {
+		var element = this;
 
-		e.preventDefault();
+		$('#modal-image').remove();
 
-		// destroy all image popovers
-		$('a[data-toggle="image"]').popover('destroy');
+		$.ajax({
+			url: 'index.php?route=common/filemanager&user_token=' + getURLVar('user_token') + '&target=' + $(this).attr('data-target') + '&thumb=' + $(this).attr('data-thumb'),
+			dataType: 'html',
+			beforeSend: function() {
+				$(element).button('loading');
+			},
+			complete: function() {
+				$(element).button('reset');
+			},
+			success: function(html) {
+				$('body').append(html);
 
-		// remove flickering (do not re-add popover when clicking for removal)
-		if ($popover) {
-			return;
-		}
-
-		$element.popover({
-			html: true,
-			placement: 'right',
-			trigger: 'manual',
-			content: function() {
-				return '<button type="button" id="button-image" class="btn btn-primary"><i class="fa fa-pencil"></i></button> <button type="button" id="button-clear" class="btn btn-danger"><i class="fa fa-trash-o"></i></button>';
+				$('#modal-image').modal('show');
 			}
 		});
+	});
 
-		$element.popover('show');
+	$(document).on('click', '[data-toggle=\'clear\']', function() {
+		var element = this;
 
-		$('#button-image').on('click', function() {
-			var $button = $(this);
-			var $icon   = $button.find('> i');
+		$('#' + $(this).attr('data-thumb')).attr('src', $('#' + $(this).attr('data-thumb')).attr('data-placeholder'));
 
-			$('#modal-image').remove();
-
-			$.ajax({
-				url: 'index.php?route=common/filemanager&user_token=' + getURLVar('user_token') + '&target=' + $element.parent().find('input').attr('id') + '&thumb=' + $element.attr('id'),
-				dataType: 'html',
-				beforeSend: function() {
-					$button.prop('disabled', true);
-
-					if ($icon.length) {
-						$icon.attr('class', 'fa fa-circle-o-notch fa-spin');
-					}
-				},
-				complete: function() {
-					$button.prop('disabled', false);
-
-					if ($icon.length) {
-						$icon.attr('class', 'fa fa-pencil');
-					}
-				},
-				success: function(html) {
-					$('body').append('<div id="modal-image" class="modal">' + html + '</div>');
-
-					$('#modal-image').modal('show');
-				}
-			});
-
-			$element.popover('destroy');
-		});
-
-		$('#button-clear').on('click', function() {
-			$element.find('img').attr('src', $element.find('img').attr('data-placeholder'));
-
-			$element.parent().find('input').val('');
-
-			$element.popover('destroy');
-		});
+		$('#' + $(this).attr('data-target')).val('');
 	});
 
 	// table dropdown responsive fix
@@ -163,6 +128,7 @@ $(document).ready(function() {
 			tb = t.offset().top + t.height(),
 			mb = m.offset().top + m.outerHeight(true),
 			d = 20;
+
 		if (t[0].scrollWidth > t.innerWidth()) {
 			if (mb + d > tb) {
 				t.css('padding-bottom', ((mb + d) - tb));
@@ -171,21 +137,132 @@ $(document).ready(function() {
 			t.css('overflow', 'visible');
 		}
 	}).on('hidden.bs.dropdown', function() {
-		$(this).css({'padding-bottom': '', 'overflow': ''});
+		$(this).css({
+			'padding-bottom': '',
+			'overflow': ''
+		});
 	});
+
+	console.log($.fn.button.prototype);
+
+
+
+
+		/*
+		$.fn.button.DEFAULTS = {
+			loadingText: 'loading...'
+		}
+
+		//$.extend({}, Button.DEFAULTS, options)
+		$.fn.button.prototype.setState = function (state) {
+			var d    = 'disabled'
+			var $el  = $(element)
+			var val  = $el.is('input') ? 'val' : 'html'
+			var data = $el.data()
+
+			state += 'Text'
+
+			if (data.resetText == null) $el.data('resetText', $el[val]())
+
+			// push to event loop to allow forms to submit
+			setTimeout($.proxy(function () {
+				$el[val](data[state] == null ? this.options[state] : data[state])
+
+				if (state == 'loadingText') {
+					this.isLoading = true
+					$el.addClass(d).attr(d, d)
+				} else if (this.isLoading) {
+					this.isLoading = false
+					$el.removeClass(d).removeAttr(d)
+				}
+			}, this), 0)
+		}
+
+		function Plugin(option) {
+			return this.each(function () {
+				var $this   = $(this)
+				var data    = $this.data('bs.button')
+				var options = typeof option == 'object' && option
+
+				if (!data) $this.data('bs.button', (data = new Button(this, options)))
+
+				if (option == 'toggle') data.toggle()
+				else if (option) data.setState(option)
+			})
+		}
+		*/
+
+
+
+	(function($) {
+
+
+
+
+
+		$.extend(true, $.fn.button.prototype, {
+			'loading': function() {
+
+				console.log('hi');
+				alert('hi');
+
+			}
+		})
+	})(window.jQuery);
+
+
+
+
+
+
+	$('button').button('test');
+
+
+
+
+
+
+	//console.log($.fn['button']);
+	//console.log($.fn.button);
+
+	$('button').button('loading');
+
+	//$('button').button('toggle');
 });
+
+
+(function($) {
+
+
+
+
+	$.extend(true, $.fn.button.prototype, {
+		'loading': function() {
+
+			console.log('hi');
+
+			alert('hi');
+		}
+	})
+})(window.jQuery);
+
+$('button').button('loading');
+
+
 
 // Autocomplete */
 (function($) {
 	$.fn.autocomplete = function(option) {
 		return this.each(function() {
 			var $this = $(this);
-			var $dropdown = $('<ul class="dropdown-menu" />');
+			var $dropdown = $('<div class="dropdown-menu"/>');
 
 			this.timer = null;
 			this.items = [];
 
 			$.extend(this, option);
+
+			$(this).wrap('<div class="dropdown">');
 
 			$this.attr('autocomplete', 'off');
 
@@ -203,7 +280,7 @@ $(document).ready(function() {
 
 			// Keydown
 			$this.on('keydown', function(event) {
-				switch(event.keyCode) {
+				switch (event.keyCode) {
 					case 27: // escape
 						this.hide();
 						break;
@@ -217,7 +294,7 @@ $(document).ready(function() {
 			this.click = function(event) {
 				event.preventDefault();
 
-				var value = $(event.target).parent().attr('data-value');
+				var value = $(event.target).attr('href');
 
 				if (value && this.items[value]) {
 					this.select(this.items[value]);
@@ -226,19 +303,12 @@ $(document).ready(function() {
 
 			// Show
 			this.show = function() {
-				var pos = $this.position();
-
-				$dropdown.css({
-					top: pos.top + $this.outerHeight(),
-					left: pos.left
-				});
-
-				$dropdown.show();
+				$dropdown.addClass('show');
 			}
 
 			// Hide
 			this.hide = function() {
-				$dropdown.hide();
+				$dropdown.removeClass('show');
 			}
 
 			// Request
@@ -264,10 +334,11 @@ $(document).ready(function() {
 
 						if (!json[i]['category']) {
 							// ungrouped items
-							html += '<li data-value="' + json[i]['value'] + '"><a href="#">' + json[i]['label'] + '</a></li>';
+							html += '<a href="' + json[i]['value'] + '" class="dropdown-item">' + json[i]['label'] + '</a>';
 						} else {
 							// grouped items
 							name = json[i]['category'];
+
 							if (!category[name]) {
 								category[name] = [];
 							}
@@ -277,10 +348,10 @@ $(document).ready(function() {
 					}
 
 					for (name in category) {
-						html += '<li class="dropdown-header">' + name + '</li>';
+						html += '<h6 class="dropdown-header">' + name + '</h6>';
 
 						for (j = 0; j < category[name].length; j++) {
-							html += '<li data-value="' + category[name][j]['value'] + '"><a href="#">&nbsp;&nbsp;&nbsp;' + category[name][j]['label'] + '</a></li>';
+							html += '<a href="' + category[name][j]['value'] + '" class="dropdown-item">&nbsp;&nbsp;&nbsp;' + category[name][j]['label'] + '</a>';
 						}
 					}
 				}
@@ -294,7 +365,8 @@ $(document).ready(function() {
 				$dropdown.html(html);
 			}
 
-			$dropdown.on('click', '> li > a', $.proxy(this.click, this));
+			$dropdown.on('click', '> a', $.proxy(this.click, this));
+
 			$this.after($dropdown);
 		});
 	}

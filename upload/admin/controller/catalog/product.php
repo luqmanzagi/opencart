@@ -493,16 +493,8 @@ class ControllerCatalogProduct extends Controller {
 	}
 
 	protected function getForm() {
-		$this->document->addStyle('view/javascript/codemirror/lib/codemirror.css');
-		$this->document->addStyle('view/javascript/codemirror/theme/monokai.css');
-		$this->document->addStyle('view/javascript/summernote/summernote.css');
-
-		$this->document->addScript('view/javascript/codemirror/lib/codemirror.js');
-		$this->document->addScript('view/javascript/codemirror/lib/xml.js');
-		$this->document->addScript('view/javascript/codemirror/lib/formatting.js');
-		$this->document->addScript('view/javascript/summernote/summernote.js');
-		$this->document->addScript('view/javascript/summernote/summernote-image-attributes.js');
-		$this->document->addScript('view/javascript/summernote/opencart.js');
+		$this->document->addScript('view/javascript/ckeditor/ckeditor.js');
+		$this->document->addScript('view/javascript/ckeditor/adapters/jquery.js');
 
 		$data['text_form'] = !isset($this->request->get['product_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 
@@ -724,8 +716,8 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['recurrings'] = $this->model_catalog_recurring->getRecurrings();
 
-		if (isset($this->request->post['product_recurrings'])) {
-			$data['product_recurrings'] = $this->request->post['product_recurrings'];
+		if (isset($this->request->post['product_recurring'])) {
+			$data['product_recurrings'] = $this->request->post['product_recurring'];
 		} elseif (!empty($product_info)) {
 			$data['product_recurrings'] = $this->model_catalog_product->getRecurrings($product_info['product_id']);
 		} else {
@@ -1162,20 +1154,18 @@ class ControllerCatalogProduct extends Controller {
 
 			foreach ($this->request->post['product_seo_url'] as $store_id => $language) {
 				foreach ($language as $language_id => $keyword) {
-					if (!empty($keyword)) {
-						if (count(array_keys($language, $keyword)) > 1) {
-							$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_unique');
-						}
-
+					if ($keyword) {
 						$seo_urls = $this->model_design_seo_url->getSeoUrlsByKeyword($keyword);
 
 						foreach ($seo_urls as $seo_url) {
-							if (($seo_url['store_id'] == $store_id) && (!isset($this->request->get['product_id']) || (($seo_url['query'] != 'product_id=' . $this->request->get['product_id'])))) {
+							if (($seo_url['store_id'] == $store_id) && ($seo_url['language_id'] == $language_id) && (!isset($this->request->get['product_id']) || (($seo_url['query'] != 'product_id=' . $this->request->get['product_id'])))) {
 								$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_keyword');
 
 								break;
 							}
 						}
+					} else {
+						$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_seo');
 					}
 				}
 			}

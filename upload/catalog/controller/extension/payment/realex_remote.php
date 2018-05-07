@@ -58,8 +58,6 @@ class ControllerExtensionPaymentRealexRemote extends Controller {
 			);
 		}
 
-		$data['language'] = $this->config->get('config_language');
-
 		return $this->load->view('extension/payment/realex_remote', $data);
 	}
 
@@ -85,7 +83,7 @@ class ControllerExtensionPaymentRealexRemote extends Controller {
 			$this->response->addHeader('Content-Type: application/json');
 			$this->response->setOutput(json_encode($json));
 			$this->response->output();
-			die();
+-			die();
 		}
 
 		$order_id = $this->session->data['order_id'];
@@ -143,7 +141,7 @@ class ControllerExtensionPaymentRealexRemote extends Controller {
 					$this->response->addHeader('Content-Type: application/json');
 					$this->response->setOutput(json_encode($json));
 					$this->response->output();
-					die();
+-					die();
 				}
 
 				// Cardholder Not Enrolled. Shift in liability. ECI = 6
@@ -168,7 +166,7 @@ class ControllerExtensionPaymentRealexRemote extends Controller {
 						$this->response->addHeader('Content-Type: application/json');
 						$this->response->setOutput(json_encode($json));
 						$this->response->output();
-						die();
+-						die();
 					} else {
 						$eci_ref = 2;
 						$xid = '';
@@ -191,7 +189,7 @@ class ControllerExtensionPaymentRealexRemote extends Controller {
 						$this->response->addHeader('Content-Type: application/json');
 						$this->response->setOutput(json_encode($json));
 						$this->response->output();
-						die();
+-						die();
 					} else {
 						$eci_ref = 3;
 						if ($this->request->post['cc_type'] == 'mc') {

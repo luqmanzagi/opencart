@@ -2,7 +2,7 @@
 
 <div class="buttons clearfix">
   <form method="POST" action="{{ action }}" id="braintree-express-form"></form>
-  <div class="pull-right">
+  <div class="float-right">
     <script src="https://www.paypalobjects.com/api/button.js?" data-merchant="braintree" data-id="paypal-button-module" data-button="checkout" data-color="{{ payment_pp_braintree_paypal_button_colour }}" data-size="{{ payment_pp_braintree_paypal_button_size }}" data-shape="{{ payment_pp_braintree_paypal_button_shape }}" data-button_type="submit" data-button_disabled="false"></script>
   </div>
 </div>
@@ -71,7 +71,7 @@
               return;
             } else {
               $.ajax({
-                url: 'index.php?route=extension/payment/pp_braintree/expressSetup&language={{ language }}',
+                url: 'index.php?route=extension/payment/pp_braintree/expressSetup',
                 type: 'post',
                 data: payload,
                 dataType: 'json',

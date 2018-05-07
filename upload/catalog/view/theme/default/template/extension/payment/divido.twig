@@ -353,7 +353,7 @@
 </div>
 
 <div class="buttons">
-    <div class="pull-right">
+    <div class="float-right">
         <input type="button" value="{{ button_confirm }}" id="button-confirm" class="btn btn-primary" data-loading-text="{{ text_loading }}" />
     </div>
 </div>
@@ -370,7 +370,6 @@
             var deposit      = $('[name="divido_deposit"]').val();
 
             var finance;
-
             if (finance_elem.length > 0) {
                 finance = finance_elem.val();
             } else {
@@ -384,7 +383,7 @@
 
             $.ajax({
                 type     : 'post',
-                url      : 'index.php?route=extension/payment/divido/confirm&language={{ language }}',
+                url      : 'index.php?route=extension/payment/divido/confirm',
                 data     : data,
                 dataType : 'json',
                 cache    : false,
